@@ -11,3 +11,4 @@ __pycache__/
 crash.log
 crash.*.log
 
+.env.prod
