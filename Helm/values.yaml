@@ -1,0 +1,28 @@
+frontend:
+  name: frontend 
+  enabled: true
+  image: blood-donor-app2-frontend:latest
+  replicas: 2
+  containerPort: 80   
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30007  
+  env:
+    REACT_APP_API_URL: http://backend:8000
+
+backend:
+  name: backend
+  image: blooddonoracr78452.azurecr.io/backend:latest
+  replicas: 1
+  port: 8000
+  servicePort: 8000  
+
+postgres:
+  name: postgres
+  image: postgres:15
+  port: 5432
+  storage: 1Gi
+  username: postgres
+  password: postgres
+  db: mydb

@@ -1,0 +1,53 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.prod
+    image: blooddonoracr78452.azurecr.io/backend:latest   # added this for azure registry
+    restart: always
+    environment:
+      DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,sucky-stige.online,api.sucky-stige.online,backend,frontend"
+      DATABASE_URL: "postgres://blooduser:${POSTGRES_PASSWORD:-bloodpass123}@db:5432/blooddonor"
+      CORS_ALLOWED_ORIGINS: "https://sucky-stige.online"
+      POSTGRES_DB: "blooddonor"
+      POSTGRES_USER: "blooduser"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-bloodpass123}"
+      POSTGRES_HOST: "db"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.get(\"http://localhost:8000/api/health/\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.prod
+    image: blooddonoracr78452.azurecr.io/frontend:latest   # <-- added this for azure registry
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: blooddonor
+      POSTGRES_USER: blooduser
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bloodpass123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blooduser -d blooddonor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
