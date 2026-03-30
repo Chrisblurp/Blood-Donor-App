@@ -2,7 +2,7 @@ frontend:
   name: frontend 
   enabled: true
   image: blood-donor-app2-frontend:latest
-  replicas: 2
+  replicas: 1
   containerPort: 80   
   service:
     type: NodePort
